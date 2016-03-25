@@ -1,0 +1,62 @@
+---
+title: "Statistical Inference Project Part 2"
+author: "wpshen"
+date: "March 25, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+This is the Part 2 of the project for the statistical inference class. We will 
+1. Load the ToothGrowth data
+2. Provide a basic summary of the data and perform some basic exploratory data analysis
+3. Compare tooth growth by supp and dose
+4. State conclusions and the assumptions needed to make them
+
+## Exploratory Data Analysis
+
+Load the ToothGrowth data and perform some basic exploratory data analyses.
+```{r}
+tr <- ToothGrowth
+str(tr)
+table(tr$dose)
+```
+
+A quick table() of the "does" shows that there are only three dose levels, i.e. 0.5, 1 and 2. Therefore, convert the numeric variable to a factor.
+
+```{r}
+tr$dose<-as.factor(tr$dose)
+str(tr)
+```
+
+Here is a basic summary of the data and a boxplot for the Tooth Growth as a function of the suppliment and does.
+```{r}
+summary(tr)
+library(ggplot2)
+g <- ggplot(tr, aes(x=dose,y=len)) + facet_grid(.~supp) + geom_boxplot()
+g + labs(title = "Boxplots by Supplement & Does", x = "Supplement & Dose",
+         y = "Tooth Growth")
+
+```
+
+## Hypothesis test of the tooth growth by suppliment and dose
+
+Using t.test, we will check if there's difference in the effect of gaving Orange Juicy and pure Vitamin C. The null hypothesis here is no difference and the p value threshold is set on 0.05. Any test that has the p value below the threshold will support us to reject the null hypothesis.
+
+```{r}
+  t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == .5, ]) 
+  t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 1, ]) 
+  t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 2, ]) 
+
+```
+
+##Assumptions and Conclusions
+
+The dataset as presented in R has little supporting documentation, but we have assumed that the data is indeed paired.
+
+From the exploratory data analysis, we observed that the tooth growth increases as the dosage of Orange Juice (OJ) or vitamin C (VC) increases.
+
+For the T-test analysis above, our Null hypothesis is that there is no difference in growth impact by orange juice or Vitamin C. From the less statistically significant p-values (<0.05) that for dosages of 0.5 mg and 1 mg, we can reject the Null hypothesis. Meaning, the orange juice is more effective at promoting tooth growth than just Vitamin C. From the p-value for the 2 mg (0.964), we can conclude that orange juice and Vitamin C are equally effective when the dosage is 2 mg.
