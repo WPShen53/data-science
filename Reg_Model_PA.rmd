@@ -9,22 +9,28 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Executive Summary  
-In this report, we will analyze `mtcars` data set and explore the relationship between a set of variables and miles per gallon (MPG). The data was extracted from the 1974 *Motor Trend* US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models). We use regression models and exploratory data analyses to mainly explore how **automatic** (am = 0) and **manual** (am = 1) transmissions features affect the **MPG** feature. The t-test shows that the performance difference between cars with automatic and manual transmission. And it is about 7 MPG more for cars with manual transmission than those with automatic transmission. Then, we fit several linear regression models and select the one with highest Adjusted R-squared value. So, given that weight and 1/4 mile time are held constant, manual transmitted cars are 14.079 + (-4.141)*weight more MPG (miles per gallon) on average better than automatic transmitted cars. Thus, cars that are lighter in weight with a manual transmission and cars that are heavier in weight with an automatic transmission will have higher MPG values.
+## Introduction  
+In this report, we explored the relationship between a set of variables and miles per gallon (MPG) (outcome) in the "mtcars"" dataset. The analysis provided the answers for the following two questions:
 
-## Exploratory Data Analysis  
-First, we load the data set `mtcars` and change some variables from `numeric` class to `factor` class.   
+1. Is an automatic or manual transmission better for MPG?
+2. Quantify the MPG difference between automatic and manual transmissions?
+
+## Exploratory Data Analysis 
 ```{r}
 library(ggplot2)
-data(mtcars)
-mtcars[1:3, ] # Sample Data
-dim(mtcars)
-mtcars$cyl <- as.factor(mtcars$cyl)
-mtcars$vs <- as.factor(mtcars$vs)
-mtcars$am <- factor(mtcars$am)
-mtcars$gear <- factor(mtcars$gear)
-mtcars$carb <- factor(mtcars$carb)
-attach(mtcars)
+dt <- mtcars
+head(dt)
+```
+
+A quick exam of the dataset has found the variables cyl, vs, am, gear and carb are factors. Thus, a type conversion was down first.   
+
+```{r}
+dt$cyl <- factor(dt$cyl)
+dt$vs <- factor(dt$vs)
+dt$am <- factor(dt$am, labels = c("automatic","manual"))
+dt$gear <- factor(dt$gear)
+dt$carb <- factor(dt$carb)
+str(dt)
 ```   
 Then, we do some basic exploratory data analyses. Please refer to the **Appendix: Figures** section for the plots. According to the box plot, we see that manual transmission yields higher values of MPG in general. And as for the pair graph, we can see some higher correlations between variables like "wt", "disp", "cyl" and "hp".  
 
