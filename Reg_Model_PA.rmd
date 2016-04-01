@@ -1,6 +1,6 @@
 ---
 title: "Reg_Model_PA"
-author: "Wenping Shen"
+author: "wpshen"
 date: "March 31, 2016"
 output: html_document
 ---
@@ -9,111 +9,108 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction  
+## Executive Summary  
 In this report, we explored the relationship between a set of variables and miles per gallon (MPG) (outcome) in the "mtcars"" dataset. The analysis provided the answers for the following two questions:
 
 1. Is an automatic or manual transmission better for MPG?
 2. Quantify the MPG difference between automatic and manual transmissions?
 
-## Exploratory Data Analysis 
+The results show that the manual transmissions does give cars a better MPG. The mean for MPG of manual, 24.39, is higher than that of automatic, 17.15.
+
+This study also create the better fit linear model for the MPG data, using only the Weight(wt), Transmission(am), and 1/4 mile time(qsec) as the regressors (including the interaction between wt and am). The Adjusted R-squared value of the model is 0.8804, which means it can explain ~88% of the variance.
+
+## Exploratory Data Analysis
+
+From the help of mtcars, it is a data fram with 32 observations on 11 variables.
+
+[, 1]	mpg	    Miles/(US) gallon
+[, 2]	cyl	    Number of cylinders
+[, 3]	disp	Displacement (cu.in.)
+[, 4]	hp	    Gross horsepower
+[, 5]	drat	Rear axle ratio
+[, 6]	wt	    Weight (1000 lbs)
+[, 7]	qsec	1/4 mile time
+[, 8]	vs	    V/S
+[, 9]	am	    Transmission (0 = automatic, 1 = manual)
+[,10]	gear	Number of forward gears
+[,11]	carb	Number of carburetors
+
 ```{r}
-library(ggplot2)
-dt <- mtcars
-head(dt)
+data(mtcars)
+head(mtcars)
 ```
 
-A quick exam of the dataset has found the variables cyl, vs, am, gear and carb are factors. Thus, a type conversion was down first.   
+
+## Is an automatic or manual transmission better for MPG?  
+Using a quick boxplot to exam the effect of tranmission on MPG
 
 ```{r}
-dt$cyl <- factor(dt$cyl)
-dt$vs <- factor(dt$vs)
-dt$am <- factor(dt$am, labels = c("automatic","manual"))
-dt$gear <- factor(dt$gear)
-dt$carb <- factor(dt$carb)
-str(dt)
-```   
-Then, we do some basic exploratory data analyses. Please refer to the **Appendix: Figures** section for the plots. According to the box plot, we see that manual transmission yields higher values of MPG in general. And as for the pair graph, we can see some higher correlations between variables like "wt", "disp", "cyl" and "hp".  
+## am = Transmission (0 = automatic, 1 = manual)
+dt <- subset (mtcars, select = c(mpg,am))
+dt$am <- factor(dt$am, labels=c("Auto","Manual")) 
+boxplot(mpg ~ am, data = dt, 
+        xlab = "Transmission Type",
+        ylab = "Miles per Gallon",
+        main = "MPG by Transmission Type")
+```
 
-## Inference  
-At this step, we make the null hypothesis as the MPG of the automatic and manual transmissions are from the same population (assuming the MPG has a normal distribution). We use the two sample T-test to show it.  
+It seems clear the the Manual transmission gives the cars a better Miles per Gallon on average.
+
+## Quantify the MPG difference between automatic and manual transmissions?  
+To quantify the difference, we can perform a quick T-test. The null hypothesis is that the automatic or manual transmission has the same effect on the MPG.  
+
 ```{r}
-result <- t.test(mpg ~ am)
-result$p.value
-result$estimate
+t.test(mpg ~ am, data = dt)
 ```  
-Since the p-value is 0.00137, we reject our null hypothesis. So, the automatic and manual transmissions are from different populations. And the mean for MPG of manual transmitted cars is about 7 more than that of automatic transmitted cars.  
 
-## Regression Analysis  
-First, we fit the full model as the following.  
-```{r, results='hide'}
-fullModel <- lm(mpg ~ ., data=mtcars)
-summary(fullModel) # results hidden
-```  
-This model has the Residual standard error as 2.833 on 15 degrees of freedom. And the Adjusted R-squared value is 0.779, which means that the model can explain about 78% of the variance of the MPG variable. However, none of the coefficients are significant at 0.05 significant level.  
+Since the p-value is 0.00137, the null hypothesis was rejected. So, the automatic transmissions does have an impact on the MPG. The mean for MPG of manual, 24.39, is higher than that of automatic, 17.15. Therefore, manual transmission is better for MPG.  
 
-Then, we use backward selection to select some statistically significant variables.  
-```{r, results='hide'}
-stepModel <- step(fullModel, k=log(nrow(mtcars)))
-summary(stepModel) # results hidden
-```  
-This model is "mpg ~ wt + qsec + am". It has the Residual standard error as 2.459 on 28 degrees of freedom. And the Adjusted R-squared value is 0.8336, which means that the model can explain about 83% of the variance of the MPG variable. All of the coefficients are significant at 0.05 significant level.    
 
-Please refer to the **Appendix: Figures** section for the plots again. According to the scatter plot, it indicates that there appear to be an interaction term between "wt" variable and "am" variable, since automatic cars tend to weigh heavier than manual cars. Thus, we have the following model including the interaction term:  
-```{r, results='hide'}
-amIntWtModel<-lm(mpg ~ wt + qsec + am + wt:am, data=mtcars)
-summary(amIntWtModel) # results hidden
-```  
-This model has the Residual standard error as 2.084 on 27 degrees of freedom. And the Adjusted R-squared value is 0.8804, which means that the model can explain about 88% of the variance of the MPG variable. All of the coefficients are significant at 0.05 significant level. This is a pretty good one.  
+## Regression Modeling
+Since we have decided to use linear model `lm` to fit the data, let's first do a variable selection. Two methods were used here have yield the same result. The first is to use the `varImp` function in the `caret` package and compute the importance of different variables against MPG.  
 
-Next, we fit the simple model with MPG as the outcome variable and Transmission as the predictor variable.  
-```{r, results='hide'}
-amModel<-lm(mpg ~ am, data=mtcars)
-summary(amModel) # results hidden
-```  
-It shows that on average, a car has 17.147 mpg with automatic transmission, and if it is manual transmission, 7.245 mpg is increased. This model has the Residual standard error as 4.902 on 30 degrees of freedom. And the Adjusted R-squared value is 0.3385, which means that the model can explain about 34% of the variance of the MPG variable. The low Adjusted R-squared value also indicates that we need to add other variables to the model.  
-
-Finally, we select the final model.  
-```{r, results='hide'}
-anova(amModel, stepModel, fullModel, amIntWtModel) 
-confint(amIntWtModel) # results hidden
-```  
-We end up selecting the model with the highest Adjusted R-squared value, "mpg ~ wt + qsec + am + wt:am".  
 ```{r}
-summary(amIntWtModel)$coef
-```  
-Thus, the result shows that when "wt" (weight lb/1000) and "qsec" (1/4 mile time) remain constant, cars with manual transmission add 14.079 + (-4.141)*wt more MPG (miles per gallon) on average than cars with automatic transmission. That is, a manual transmitted car that weighs 2000 lbs have 5.797 more MPG than an automatic transmitted car that has both the same weight and 1/4 mile time.  
+library(mlbench)
+library(caret)
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+model <- train(mpg~., data=mtcars, method="lm", preProcess="scale", trControl=control)
+importance <- varImp(model, scale=FALSE)
+plot (importance)
+```
 
-## Residual Analysis and Diagnostics  
-Please refer to the **Appendix: Figures** section for the plots. According to the residual plots, we can verify the following underlying assumptions:  
-1. The Residuals vs. Fitted plot shows no consistent pattern, supporting the accuracy of the independence assumption.  
-2. The Normal Q-Q plot indicates that the residuals are normally distributed because the points lie closely to the line.  
-3. The Scale-Location plot confirms the constant variance assumption, as the points are randomly distributed.  
-4. The Residuals vs. Leverage argues that no outliers are present, as all values fall well within the 0.5 bands.  
+As shown, the Weight(wt), Transmission(am), and 1/4 mile time(qsec) are the most important variables. Alternatively, We can also use the stepAIC{MASS} fucntion for the analysis
 
-As for the Dfbetas, the measure of how much an observation has effected the estimate of a regression coefficient, we get the following result:  
 ```{r}
-sum((abs(dfbetas(amIntWtModel)))>1)
-```  
-Therefore, the above analyses meet all basic assumptions of linear regression and well answer the questions.  
+library(MASS)
+step <- stepAIC(lm(mpg~.,data=mtcars), trace=FALSE)
+step$anova
+```
 
-## Appendix: Figures  
-1. Boxplot of MPG vs. Transmission  
+The anova result has recommended the use of Weight(wt), Transmission(am), and 1/4 mile time(qsec) to fit the linear model
+
 ```{r}
-boxplot(mpg ~ am, xlab="Transmission (0 = Automatic, 1 = Manual)", ylab="MPG",
-        main="Boxplot of MPG vs. Transmission")
-```  
-2. Pair Graph of Motor Trend Car Road Tests  
+fit <- lm (mpg ~ wt + am + qsec, data = mtcars)
+summary (fit)
+```
+
+We can further improve the model by looking at the interaction between variables. 
+
 ```{r}
-pairs(mtcars, panel=panel.smooth, main="Pair Graph of Motor Trend Car Road Tests")
-```  
-3. Scatter Plot of MPG vs. Weight by Transmission  
+cor (subset(mtcars, select=c("wt","am","qsec")))
+```
+
+It indicates that "wt" and "am" has an interaction, 0.69. So let's add this interaction and check the model again,
+
 ```{r}
-ggplot(mtcars, aes(x=wt, y=mpg, group=am, color=am, height=3, width=3)) + geom_point() +  
-scale_colour_discrete(labels=c("Automatic", "Manual")) + 
-xlab("weight") + ggtitle("Scatter Plot of MPG vs. Weight by Transmission")
-```  
-4. Residual Plots
+betterfit <- lm (mpg ~ wt*am + qsec, data = mtcars)
+summary (betterfit)
+```
+Now the Adjusted R-squared value is 0.8804, which means the model can explain ~88% of the variance, an improvement of ~5% from without the interaction. It is a pretty good model now.
+
 ```{r}
+## Residual Plots
 par(mfrow = c(2, 2))
-plot(amIntWtModel)
+plot(betterfit)
 ```  
+
+
