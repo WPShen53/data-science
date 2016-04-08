@@ -19,6 +19,26 @@ data$classe <- factor(data$classe)
 inTrain <- createDataPartition(data$classe, p=0.8, list=FALSE, times=1)
 training <- data[inTrain,]
 testing <- data[-inTrain,]
+
+accu <- numeric()
+outEr <- numeric()
+
+# 1. rpart
 fit1 <- train(classe~., method="rpart", data=training)
 importance <- varImp(fit1)
+pred1 <- predict(fit1, training)
+accu[length(accu)+1] <- sum(pred1 == training$classe)/length(pred1)
+tpred1 <- predict(fit1, testing)
+outEr[length(outEr)+1] <- sum(tpred1 == testing$classe)/length(tpred1)
+
 ```
+
+
+```{r}
+valdata <- read.csv("pml-testing.csv", na.strings = c("", "#DIV/0!", "NA"), 
+                    row.names=1, stringsAsFactors=FALSE)
+valdata <- valdata[,colSums(is.na(valdata))<0.9*nrow(valdata)] # remove the column is 90% NA
+valdata$classe <- factor(valdata$classe)
+
+```
+
