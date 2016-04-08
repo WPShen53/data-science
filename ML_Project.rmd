@@ -21,15 +21,20 @@ training <- data[inTrain,]
 testing <- data[-inTrain,]
 
 accu <- numeric()
-outEr <- numeric()
 
-# 1. rpart
+# 1. Recursive Partitioning and Regression Trees
 fit1 <- train(classe~., method="rpart", data=training)
+pred1 <- predict(fit1, testing)
+accu[length(accu)+1] <- sum(pred1 == testing$classe)/length(pred1)
+confusionMatrix(data = pred1, testing$classe)
 importance <- varImp(fit1)
-pred1 <- predict(fit1, training)
-accu[length(accu)+1] <- sum(pred1 == training$classe)/length(pred1)
-tpred1 <- predict(fit1, testing)
-outEr[length(outEr)+1] <- sum(tpred1 == testing$classe)/length(tpred1)
+
+# 2. Random Forest
+fit2 <- train(classe~., method="rf", data=training)
+pred2 <- predict(fit2, testing)
+accu[length(accu)+1] <- sum(pred2 == testing$classe)/length(pred2)
+confusionMatrix(data = pred2, testing$classe)
+importance <- varImp(fit2)
 
 ```
 
