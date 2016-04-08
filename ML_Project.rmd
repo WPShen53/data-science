@@ -1,4 +1,15 @@
 ---
+title: "Machine Learning Project"
+author: "wpshen"
+date: "April 8, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
 library(caret); library(rpart); library(klaR)
 set.seed(123456)
 data <- read.csv("pml-training.csv", na.strings = c("", "#DIV/0!", "NA"), 
@@ -10,3 +21,4 @@ training <- data[inTrain,]
 testing <- data[-inTrain,]
 fit1 <- train(classe~., method="rpart", data=training)
 importance <- varImp(fit1)
+```
