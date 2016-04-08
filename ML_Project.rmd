@@ -1,23 +1,12 @@
 ---
-title: "Machine Learning Project"
-author: "wpshen"
-date: "April 8, 2016"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
-library(caret); library(klaR)
+library(caret); library(rpart); library(klaR)
 set.seed(123456)
-data <- read.csv("pml-training.csv", na.strings = c("", "#DIV/0!", "NA"), stringsAsFactors=TRUE)
+data <- read.csv("pml-training.csv", na.strings = c("", "#DIV/0!", "NA"), 
+                 row.names=1, stringsAsFactors=FALSE)
 data <- data[,colSums(is.na(data))<0.9*nrow(data)] # remove the column is 90% NA
+data$classe <- factor(data$classe)
 inTrain <- createDataPartition(data$classe, p=0.8, list=FALSE, times=1)
 training <- data[inTrain,]
 testing <- data[-inTrain,]
-fit1 <- train(classe~., method="nb", data=training)
+fit1 <- train(classe~., method="rpart", data=training)
 importance <- varImp(fit1)
-```
-
