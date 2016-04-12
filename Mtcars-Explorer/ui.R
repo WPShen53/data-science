@@ -43,7 +43,7 @@ shinyUI(fluidPage(
                              selected = 1),
                 checkboxGroupInput("cyl", label = "Number of Cyclinders",
                                    choices = list("4"=4, "6"=6, "8"=8),
-                                   selected = 4)
+                                   selected = c(4,6))
             )
         ),
         
