@@ -30,7 +30,7 @@ shinyUI(fluidPage(
     sidebarLayout(
         sidebarPanel(
             wellPanel(
-                strong("Instruction"),br(),br(),
+                strong("Description"),br(),br(),
                 'This application uses the Motor Trend Car Road 
                 Tests (mtcars) dataset. You can pick the variables from the panel below, 
                 and view the impact on gas mileage of popular cars and 
