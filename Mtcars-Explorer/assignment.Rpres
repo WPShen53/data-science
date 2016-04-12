@@ -21,7 +21,8 @@ Link to the detail instruction can be found below
 The Shiny Application (1/2)
 ========================================================
 
-The Shiny application created for this assignment is an interactive linear regression explorer using the Moter Trend Car Road Tests dataset. 
+The Shiny application created for this assignment is an interactive linear 
+regression explorer using the Moter Trend Car Road Tests dataset. 
 
 <font size="6" face="monospace">
 ```{r, echo=FALSE}
@@ -33,8 +34,8 @@ mtcars[1:5,]
 The Shiny Application (2/2)
 ========================================================
 
-The application lets you pick the regressors and plot the {lm} relation with 
-the gas milage, i.e. Miles/(US) gallon.
+The application lets you pick the regressors and plot the linear relation 
+{lm} with the gas milage, i.e. Miles/(US) gallon.
 
 <font size="5">
 It can be found @ https://www.shinyapps.io/admin/#/dashboard>
