@@ -11,7 +11,7 @@ library(shiny)
 library(datasets)
 library(ggplot2)
 
-mtcars$cyl <- as.factor(mtcars$cyl)
+mtcars$cyl <- factor(mtcars$cyl)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -30,7 +30,8 @@ shinyServer(function(input, output) {
     
     data <- reactive({
         # Combine the selected variables into a new data frame
-        mtcars[(mtcars$cyl%in%input$cyl & mtcars$am==input$am), c("mpg", input$x, "cyl")]
+        mtcars[(mtcars$cyl%in%input$cyl & mtcars$am==input$am), 
+               c("mpg", input$x, "cyl")]
         
     })
     
