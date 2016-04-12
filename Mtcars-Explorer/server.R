@@ -40,7 +40,7 @@ shinyServer(function(input, output) {
                        ifelse(input$am==0, "automatic", "manual") ,
                        "transmission")
             
-        p<- ggplot(data(), aes(data()[1], data()[2])) +
+        p<- ggplot(data(), aes(mpg, data()[2])) +
             geom_point(size=3, aes(color=cyl)) +
             geom_smooth(method = "lm") +
             labs (title=title, y=dispName[["mpg"]], x=dispName[[input$x]]) +
