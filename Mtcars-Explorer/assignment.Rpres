@@ -33,18 +33,20 @@ mtcars[1:5,]
 The Shiny Application (2/2)
 ========================================================
 
-The application lets you pick the regressors and plot the {lm} relation with the gas milage, i.e. Miles/(US) gallon.
-
-![alt text](shinyApp.png)
+The application lets you pick the regressors and plot the {lm} relation with 
+the gas milage, i.e. Miles/(US) gallon.
 
 <font size="5">
-https://www.shinyapps.io/admin/#/dashboard>
+It can be found @ https://www.shinyapps.io/admin/#/dashboard>
 </font>
+![alt text](shinyApp.png)
+
 
 The Reproducible Pitch Presentation
 ========================================================
 
-This presentation, as the second part of the assignment, was prepared by R Presentation in RStudio. and is published to the RPubs website
+This presentation, as the second part of the assignment, was prepared by R 
+Presentation in RStudio, and was published to the RPubs website
 
 <font size="5">
 <https://rpubs.com/WPShen53>
