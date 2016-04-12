@@ -33,7 +33,7 @@ shinyUI(fluidPage(
                 strong("Instruction"),br(),br(),
                 'This application uses the Motor Trend Car Road 
                 Tests (mtcars) dataset. You can pick the variables from the panel below, 
-                and view the impact on gase mileage of popular cars and 
+                and view the impact on gas mileage of popular cars and 
                 the data used.'
             ),
             wellPanel(
