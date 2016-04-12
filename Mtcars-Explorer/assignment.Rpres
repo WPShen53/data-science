@@ -1,0 +1,51 @@
+Coursera Course Assignment: Shiny Application and Reproducible Pitch
+========================================================
+author: Wenping Shen
+date: `r format(Sys.time(), "%d %B, %Y")`
+autosize: true
+
+Assignment Instruction
+========================================================
+
+This peer assessed assignment has two parts.
+
+1. a Shiny application and deploy it on Rstudio's servers. 
+2. a reproducible pitch presentation prepared by Slidify or Rstudio Presenter about the Shiny application.
+
+Link to the detail instruction can be found below
+
+<font size="5">
+<https://www.coursera.org/learn/data-products/peer/tMYrn/course-project-shiny-application-and-reproducible-pitch>
+</font>
+
+The Shiny Application (1/2)
+========================================================
+
+The Shiny application created for this assignment is an interactive linear regression explorer using the Moter Trend Car Road Tests dataset. 
+
+<font size="6" face="monospace">
+```{r, echo=FALSE}
+mtcars[1:5,]
+```
+</font>
+
+
+The Shiny Application (2/2)
+========================================================
+
+The application lets you pick the regressors and plot the {lm} relation with the gas milage, i.e. Miles/(US) gallon.
+
+![alt text](shinyApp.png)
+
+<font size="5">
+https://www.shinyapps.io/admin/#/dashboard>
+</font>
+
+The Reproducible Pitch Presentation
+========================================================
+
+This presentation, as the second part of the assignment, was prepared by R Presentation in RStudio. and is published to the RPubs website
+
+<font size="5">
+<https://rpubs.com/WPShen53>
+</font>
