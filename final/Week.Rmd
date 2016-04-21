@@ -64,11 +64,13 @@ topfeatures(us_dfm[3],10) # for twitter
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=8}
 require(RColorBrewer)
-#par(mfrow = c(1, 3))
+par(mfrow = c(2, 3))
 plot(us_dfm[1], colors = brewer.pal(6, "Dark2"), max.words=100)
 plot(us_dfm[2], colors = brewer.pal(6, "Dark2"), max.words=100)
 plot(us_dfm[3], colors = brewer.pal(6, "Dark2"), max.words=100)
-
+plot(topfeatures(us_dfm[1],100), main = "Blogs")
+plot(topfeatures(us_dfm[2],100), main = "News")
+plot(topfeatures(us_dfm[3],100), main = "Twitter")
 ```
 
 Not surprisingly, we found similarities and differences of most used words in the social medias. Next, we will exam the word collections using the `collocations` function. It is handy function that returns a data.frame of collocations and their scores, in descending order of the association measure.
