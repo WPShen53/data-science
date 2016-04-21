@@ -1,0 +1,96 @@
+---
+title: "Capstone Project Milestone Report"
+author: "Wpshen"
+date: Thu Apr 21 09:03:14 2016
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Summary
+
+The capstone project of the Coursera Data Scientist Specialist program is to create a predictive text model for typing, similar to the smart keyboard from SwiftKey. As an user types his/her words, a set of recommended next words will be displayed. The feature is particularly useful for people to type on their mobile devices.
+
+In this intermediate report, we will perform an exploratory analysis of the dataset from 
+
+- <https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip>
+
+and out goals is to exam the twitter, news and blogs dataset in the en_US directory and understand, the
+
+1. use of words
+2. relationship between the words
+3. frequencies of words and word pairs 
+
+By this study, we will also form the structure and approach for the eventual app and algorithm.
+
+
+## Exploratory Analysis
+
+When handling large datasets, resource management in r, especially the memory, becomes very important. Thus, we have first performed a quick resources analysis for loading the text file ( en_US.twitter.txt) to an workable object in R. Three methods were used, namely `readLine{base}`, `corpus,textfile{quanteda}` and `Corpus,VectorSource{tm}`. It is clear from the comparison table below that the {quanteda} package are more efficient in tasks of managing and analyzing text. A big thanks to Ken Benoit and Paul Nulty. More information can be found on their Github <https://github.com/kbenoit/quanteda>. As a results, we will use the `quanteda` package in all following analysis and future text prediction modeling tasks.  
+
+```{r eval=FALSE}
+tweets <- readLines("final/en_US/en_US.twitter.txt")
+twCorpus <- corpus(textfile("final/en_US/en_US.twitter.txt"))
+tmtwCorpus <- Corpus(VectorSource(tweets))`
+
+```
+
+Load Type {library}           | Size (Mb)  | Elapsed time (s)
+------------------------------|------------|----------------
+file -> Chr list {base}       |   316.0    | 7.05
+file -> corpus {quanteda}     |   165.3    | 11.25
+Chr list -> VCorpus {tm}      | 9,072.3    | 372.35
+
+Now to the real analysis, we started by loading all three files into a corpus and reviewing the summary
+
+```{r eval=TRUE, warning=FALSE}
+suppressPackageStartupMessages(library(quanteda))
+us_corpus <- corpus(textfile("final/en_US/*.txt"))
+docvars(us_corpus, "Media.Type") <- c("blogs","news","tweets")
+summary(us_corpus)
+```
+
+The {quanteda} package did a pretty good job read in the three text files and summarize the features within a reasonable among of time. The Types shows the unique features of a document while the Tokens shows the total features (words). These are not cleaned prior to counting. At the first glance, there seems to be different patterns among the three. Therefore, we decided to build different text prediction models for each case. The `Media.Type` doc-level feature was inserted so we can easily extract the info based on the type of social media. Next, we will exam the words and word statistics in these documents.
+
+```{r eval=TRUE, message=FALSE, warning=FALSE, collapse=TRUE}
+us_dfm <- dfm(us_corpus, groups="Media.Type", verbose=FALSE)
+topfeatures(us_dfm[1],10) # for blogs
+topfeatures(us_dfm[2],10) # for news
+topfeatures(us_dfm[3],10) # for twitter
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=8}
+require(RColorBrewer)
+#par(mfrow = c(1, 3))
+plot(us_dfm[1], colors = brewer.pal(6, "Dark2"), max.words=100)
+plot(us_dfm[2], colors = brewer.pal(6, "Dark2"), max.words=100)
+plot(us_dfm[3], colors = brewer.pal(6, "Dark2"), max.words=100)
+
+```
+
+Not surprisingly, we found similarities and differences of most used words in the social medias. Next, we will exam the word collections using the `collocations` function. It is handy function that returns a data.frame of collocations and their scores, in descending order of the association measure.
+
+```{r eval=TRUE}
+# detect word collocaions using the likelihood ratio statistic G^2 
+blogs_ws <- collocations (subset(us_corpus, Media.Type=="blogs"), method="lr")
+news_ws  <- collocations (subset(us_corpus, Media.Type=="news"), method="lr")
+tweet_ws <- collocations (subset(us_corpus, Media.Type=="tweets"), method="lr")
+
+```
+
+
+
+```{r eval=FALSE}
+# dfm default => toLower, english, and remove numbers, separator, punct
+mydfm <- dfm(myCorpus, verbose = TRUE)
+bidfm <- dfm(myCorpus, ngrams = 2, verbose = TRUE)
+mydfm <- sort(mydfm) # sort decreasing = TRUE
+bidfm <- sort(bidfm)
+head(mydfm)
+topfeatures(mydfm, 1000)
+
+```
+
