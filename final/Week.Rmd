@@ -73,7 +73,7 @@ plot(topfeatures(us_dfm[2],100), main = "News")
 plot(topfeatures(us_dfm[3],100), main = "Twitter")
 ```
 
-Not surprisingly, we found similarities and differences of most used words in the social medias. Next, we will exam the word collections using the `collocations` function. It is handy function that returns a data.frame of collocations and their scores, in descending order of the association measure.
+Not surprisingly, we found similarities and differences of the most used words in different social medias. The "stop" words occupy the top across all media, with "the" takes the number one spot. The word "you" shows up on top in Tweets, but not on Blogs nor News. Next, we will exam the word collections using the `collocations` function. It is a handy function that returns a data.frame of collocations and their scores, in descending order of the association measure.
 
 ```{r eval=TRUE}
 # detect word collocaions using the likelihood ratio statistic G^2 
