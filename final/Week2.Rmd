@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+memory.limit(size=16000)
+```
+
 
 ## Summary
 
@@ -29,7 +33,16 @@ By this study, we will also form the structure and approach for the eventual app
 
 ## Exploratory Analysis
 
-When handling large datasets, resource management in r, especially the memory, becomes very important. Thus, we have first performed a quick resources analysis for loading the text file ( en_US.twitter.txt) to an workable object in R. Three methods were used, namely `readLine{base}`, `corpus,textfile{quanteda}` and `Corpus,VectorSource{tm}`. It is clear from the comparison table below that the {quanteda} package are more efficient in tasks of managing and analyzing text. A big thanks to Ken Benoit and Paul Nulty. More information can be found on their Github <https://github.com/kbenoit/quanteda>. As a results, we will use the `quanteda` package in all following analysis and future text prediction modeling tasks.  
+Using the `wc -m -w -l -L *.txt` command, we first examed the basic summaries of the three files in en_US directory.
+
+Chars|Words|Lines|Max line length|File name
+---|-|-|-|--
+   899,288|  37,272,578| 210,160,014|     40,832| en_US.blogs.txt
+  1,010,242|  34,309,642| 205,811,889|     11,384| en_US.news.txt
+  2,360,148|  30,341,028| 167,105,338|       140| en_US.twitter.txt
+  4,269,678| 101,923,248| 583,077,241|     40,832| total
+
+When handling large datasets, resource management in r, especially the memory, becomes very important. A quick resource analysis was done for loading the text file ( en_US.twitter.txt) to an workable object in R. Three methods were used, namely `readLine{base}`, `corpus,textfile{quanteda}` and `Corpus,VectorSource{tm}`. It is clear from the comparison table below that the {quanteda} package are more efficient in tasks of managing and analyzing text. A big thanks to Ken Benoit and Paul Nulty. More information can be found on their Github <https://github.com/kbenoit/quanteda>. As a results, we will use the `quanteda` package in all following analysis and future text prediction modeling tasks.  
 
 ```{r eval=FALSE}
 tweets <- readLines("final/en_US/en_US.twitter.txt")
@@ -62,7 +75,7 @@ topfeatures(us_dfm[2],10) # for news
 topfeatures(us_dfm[3],10) # for twitter
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=8}
+```{r eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
 require(RColorBrewer)
 par(mfrow = c(2, 3))
 plot(us_dfm[1], colors = brewer.pal(6, "Dark2"), max.words=100)
@@ -75,24 +88,19 @@ plot(topfeatures(us_dfm[3],100), main = "Twitter")
 
 Not surprisingly, we found similarities and differences of the most used words in different social medias. The "stop" words occupy the top across all media, with "the" takes the number one spot. The word "you" shows up on top in Tweets, but not on Blogs nor News. Next, we will exam the word collections using the `collocations` function. It is a handy function that returns a data.frame of collocations and their scores, in descending order of the association measure.
 
-```{r eval=TRUE}
+```{r eval=TRUE, message=FALSE, warning=FALSE, collapse=TRUE}
 # detect word collocaions using the likelihood ratio statistic G^2 
 blogs_ws <- collocations (subset(us_corpus, Media.Type=="blogs"), method="lr")
 news_ws  <- collocations (subset(us_corpus, Media.Type=="news"), method="lr")
 tweet_ws <- collocations (subset(us_corpus, Media.Type=="tweets"), method="lr")
-
+head(blogs_ws)
+head(news_ws)
+head(tweet_ws)
 ```
 
+## Define Modeling Approach
+
+At this point, we have a pretty good understanding of the en_US dataset. Different text predictive model should be built for each social media, since different word-pair patterns were found. When building the predictive models, we could search the top three matches in the word sequences data.frame produced by the `collocations` function. This should form pretty good base models. Directions to further improve the predictive result could be done by including algorithms of 3-gram and/or Natural Language Processing (NLP).  
 
 
-```{r eval=FALSE}
-# dfm default => toLower, english, and remove numbers, separator, punct
-mydfm <- dfm(myCorpus, verbose = TRUE)
-bidfm <- dfm(myCorpus, ngrams = 2, verbose = TRUE)
-mydfm <- sort(mydfm) # sort decreasing = TRUE
-bidfm <- sort(bidfm)
-head(mydfm)
-topfeatures(mydfm, 1000)
-
-```
-
+-
