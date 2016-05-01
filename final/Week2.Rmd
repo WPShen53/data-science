@@ -36,7 +36,7 @@ By this study, we will also form the structure and approach for the eventual app
 Using the `wc -m -w -l -L *.txt` command, we first examed the basic summaries of the three files in en_US directory.
 
 Chars|Words|Lines|Max line length|File name
----|-|-|-|--
+----|---|---|---|---
    899,288|  37,272,578| 210,160,014|     40,832| en_US.blogs.txt
   1,010,242|  34,309,642| 205,811,889|     11,384| en_US.news.txt
   2,360,148|  30,341,028| 167,105,338|       140| en_US.twitter.txt
