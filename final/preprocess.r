@@ -27,17 +27,17 @@ createWordSequenceFile <- function(inTxt, outTxt,
     ## build word sequence matrix using {quanteda} package
     if (verbose) print("building word sequence matrix ...")
     ws <- collocations (txt, removePunct=TRUE, removeNumbers=TRUE, size=2)
-    #ws <- ws[ws$count>2]
-    #ws <- ws[order(ws$count, decreasing=TRUE)]
+    ws <- ws[ws$count>2]
+    ws <- ws[order(ws$count, decreasing=TRUE)]
     ws2 <- collocations (txt, removePunct=TRUE, removeNumbers=TRUE, size=3)
-    #ws2 <- ws2[ws2$count>2]
-    #ws2 <- ws2[order(ws2$count, decreasing=TRUE)]
+    ws2 <- ws2[ws2$count>2]
+    ws2 <- ws2[order(ws2$count, decreasing=TRUE)]
     
     ### trim the word sequence matrix
     if (verbose) print("triming word sequence matrix ...")
     ws <- data.table(ws)
     setkey(ws, word1)
-    ws <- ws[,.SD[order(count,decreasing=TRUE)[1:5]],by=word1]
+#    ws <- ws[,.SD[order(count,decreasing=TRUE)[1:10]],by=word1]
     ws <- rbind(ws, ws2)
     ws <- ws[ws$word1 != ws$word2]
     ws <- ws[ws$word1 != ws$word3]
@@ -108,7 +108,7 @@ nNextWord <- function (inTxt, ws, nword=3L) {
 ###
 ### Calculate the accuracy of next word predictive
 ###
-accuracy <- function (txt, ws, verbose=FALSE) {
+accuracy <- function (txt, ws, nword=5, verbose=FALSE) {
     txt <- strsplit(txt, split = " ")
     tmatch <- 0
     for (i in 1:nline) {
@@ -117,7 +117,7 @@ accuracy <- function (txt, ws, verbose=FALSE) {
         sentance <- ""
         for (j in 1:(ntxt-1)) {
             sentance <- paste (sentance, txt[[i]][j], sep=" ")
-            n_words <- nNextWord(sentance, ws, 5)
+            n_words <- nNextWord(sentance, ws, nword)
             if (n_words[[1]]!="good") next
             if (txt[[i]][j+1] %in% n_words[[2]]) match <- match+1
         }
@@ -132,9 +132,9 @@ accuracy <- function (txt, ws, verbose=FALSE) {
 
 ###########################
 memory.limit(size = 16000)
-sample_ratio <- 0.6 
-news_ws <- createWordSequenceFile ("final/en_US/en_US.news.txt", outTxt = "news_ws_6",
-                                   perc = sample_ratio, toGzip = TRUE)
+sample_ratio <- 0.1 
+news_ws <- createWordSequenceFile ("final/en_US/en_US.news.txt", outTxt = "news_ws",
+                                   perc = sample_ratio, toGzip = FALSE)
 blogs_ws <- createWordSequenceFile ("final/en_US/en_US.blogs.txt", outTxt = "blogs_ws",
                                     perc = sample_ratio, toGzip = FALSE)
 tweet_ws <- createWordSequenceFile ("final/en_US/en_US.twitter.txt", outTxt = "tweet_ws",
@@ -145,8 +145,17 @@ total_ws <- rbind(news_ws,blogs_ws,tweet_ws)
 news_ws <- data.table(read.csv("news_ws.csv.gz",header=TRUE,stringsAsFactors=FALSE))
 ## test the accuracy of prediction
 nline <- 20
-txt <- sample_lines("final/en_US/en_US.news.txt", nline)
-## do comparison
+txt <- sample_lines("final/en_US/en_US.twitter.txt", nline)
+
+## do comparison of suggested words
+accTable <- data.frame(acc=c(0,0))
+for (n in 1:10) {
+    accTable[n,] <- accuracy(txt, news_ws, nword = n, verbose = FALSE)
+    print (accTable[n,])
+}
+accTable
+
+## do comparison of Frequence/Likelihood and min occurrence
 gnews_ws <- news_ws[order(news_ws$G2, decreasing = TRUE)]
 accTable <- data.frame(Freq=c(0,0),G2=c(0,0),Size=c(0,0))
 ### full word sequence
@@ -178,3 +187,18 @@ for (i in 1:10) {
     print(n_words[[2]])
 }
 print(sentance)
+
+
+
+## testing the word coverage
+library(stringi)
+inTxt <- "final/en_US/en_US.news.txt"
+num_lines <- determine_nlines(inTxt)
+ntokens <- rep(0L, 10)
+for (n in 1:10) {
+    print(n)
+    txt <- sample_lines(inTxt, as.integer(num_lines*n/10))
+    stats <- tokenize(txt, what='fastestword')
+    ntokens[n] <- length(stats)
+}
+system("wc -m -w -l -L *.txt")

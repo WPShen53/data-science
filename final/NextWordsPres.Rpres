@@ -1,0 +1,63 @@
+Capstone Project: Predicting the Next Word
+========================================================
+author: WPShen
+date: `r format(Sys.time(), "%d %B, %Y")`
+autosize: true
+
+Project Summary
+========================================================
+
+The purpose of this final project is to create a model to predict the next word in a sentence, given the initial fragment of the sentence of one or more words.
+
+As Natural Language Process or Text Processing were not taugh. Self-study of the references from course website and the following books were done to obtain the necessary knowledge.
+
+- "Speech and Language Processing", Daniel Jurafsky & James H. Martin
+- "Foundations of Statistical Natural Language Processing", Chris Manning and Hinrich Schütze
+
+Training dataset is provided from the Coursera site. <a href="https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip">Capstone Dataset</a>
+
+
+Exploratory Analysis
+========================================================
+
+- <b>Different Patterns in Different Social Media</b>. Although using the same language, i.e. English, different word used, frequency and collocation were observed. 
+
+- <b>Sampling Size for Modeling</b>. The training sample size was determined by the unique words (vocabulary) in the sample. 60% of random sampled data is used for modeling, as it covers over 96% of the word used in the total dataset.
+<font size="6" face="monospace">
+</font>
+
+- <b>Text cleaning</b>. Like any project using unstructured data, data cleaning is a critical and time consuming task. The data set was encoded with UTF-8 then striped the numbers, punctuations, whitespaces, user names, urls, and any non-ASCII characters.
+
+
+Modeling Approach
+========================================================
+
+- <b>3-grams & 2-grams Markov Chain Model</b>. After studied quite a few reference articles, 3-grams based Markov Chain model with 2-grams & 1-gram to support the backoff was picked. 
+
+- <b>Backoff and Smoothing</b>. The "Stupid Backoff" were implemented to handle 3-grams matches are not available. The selection of the algorithm was due to the simplicity and speed of the algorithm. Kneser-Ney Smoothing was tried but not used due to performance reason. 
+
+- <b>Weight for Different Social Media</b>. Weights were applied when combined the 3 word sequence matrices. The weights were adjusted based on the accuracy test of the 20% validation data.
+
+
+Tuning the Model
+========================================================
+
+- <b>Number of Suggestions</b> In the validation test, suggest between 5 or 6 words has max out the hit rate. Max 5 suggested words was picked as the configuration.
+
+- <b>Balance between prediction accuracy and performance</b> Remove word pairs that only occur N times would reduce library size but may sacrificed the hit rate. Tests found that when N=2 yields the best balance. 
+<font size="6" face="monospace">
+```{r, echo=TRUE, eval=FALSE}
+N=0/768MB/Acc=0.236; N=1/94MB/Acc=0.242, N=2/46MB/Acc=0.233
+```
+</font>
+- <b>Collocations, Frequency or Likelihood</b> Suggested words can be ranked by the frequency or likelihood in the training set. Although similar, the likelihood yields a higher accuracy when trained with large dataset.
+
+
+Final Model & What's Next
+========================================================
+
+- The final word sequence model is a 42.7 MB csv file, which is a reasonable size for mobile devices.
+- Applying the 20% test set shows ~26% of the actual next word falls in the 5 suggestions by the model.  
+- What's Next
+    * <b>Part-of-Speech Tagging (POS)</b>. Grammer is an important part in written language. POS tagging can be used to further improve the 
+    * <b>Personal Learning Algorithm</b>. A simple localized learning algorithm can further fine tune the model, and then improve the user experience. 
