@@ -10,17 +10,6 @@
 library(shiny)
 library(datasets)
 
-dispName <- c('Weight (1000 lbs)'='wt',
-              'Displacement (cu.in.)'='disp',
-              'Gross horsepower'='hp',
-              'Rear axle ratio'='drat',
-              '1/4 mile time'='qsec',
-              'V/S'='vs',
-              'Number of forward gears'='gear',
-              'Number of carburetors'='carb')
-
-
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(wellPanel(
     
     # Application title
@@ -37,9 +26,9 @@ shinyUI(fluidPage(wellPanel(
                   Backoff and smoothing were also done to improve the result. 
                   By typing a few words of your sentence in the input box and 
                   click the submit bottom, the application can return up to 5
-                  suggested next words. In self-estimate that also using real
-                  online captured sentences, the model show an average of 26%
-                  hit rate. Hope you have fun!"),
+                  suggested next words. In self-validation that also used real
+                  online captured sentences, the model showed an average of 26%
+                  hit rate. Hope you enjoy it!"),
         helpText ("* When starts the application for the first time, please wait 
                   a few seconds until the output panel shows [Message:: Please 
                   type in a few words above.]. This allows the word sequence model
@@ -49,7 +38,7 @@ shinyUI(fluidPage(wellPanel(
     
     wellPanel(
         textInput('sentenceInputVar', 'Type your sentence here:'),
-        helpText('(Example: "It is understanding" or "Why nobody")'),
+        helpText('(Example: "I went to the" or "Why nobody")'),
         actionButton('submitButton', 'Submit')
     ),
     
