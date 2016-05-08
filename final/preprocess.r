@@ -1,6 +1,5 @@
 library(quanteda)
 library(LaF)
-library(R.utils)
 library(data.table)
 
 set.seed(335599)
@@ -10,17 +9,16 @@ set.seed(335599)
 ###
 createWordSequenceFile <- function(inTxt, outTxt, 
                                    perc = 0.6,
-                                   toGzip = TRUE,
+                                   toGzip = FALSE,
                                    verbose = TRUE) 
 {
     require(quanteda)
     require(LaF)
-    require(R.utils)
     require(data.table)
     
     ### readin from file
     if (verbose) print("counting file length ...")
-    num_lines <- countLines(inTxt)
+    num_lines <- determine_nlines(inTxt)
     if (verbose) print("reading in data ...")
     txt <- sample_lines(inTxt, perc*num_lines)
     if (verbose) print("cleaning up text ...")
@@ -28,13 +26,12 @@ createWordSequenceFile <- function(inTxt, outTxt,
     
     ## build word sequence matrix using {quanteda} package
     if (verbose) print("building word sequence matrix ...")
-    ws <- collocations (txt, removePunct=TRUE,  
-                        removeNumbers=TRUE, size=2)
-    ws <- ws[order(ws$count, decreasing=TRUE)]
-    ws2 <- collocations (txt, removePunct=TRUE,  
-                        removeNumbers=TRUE, size=3)
-    ws2 <- ws2[ws$count>1]
-    ws2 <- ws2[order(ws2$count, decreasing=TRUE)]
+    ws <- collocations (txt, removePunct=TRUE, removeNumbers=TRUE, size=2)
+    #ws <- ws[ws$count>2]
+    #ws <- ws[order(ws$count, decreasing=TRUE)]
+    ws2 <- collocations (txt, removePunct=TRUE, removeNumbers=TRUE, size=3)
+    #ws2 <- ws2[ws2$count>2]
+    #ws2 <- ws2[order(ws2$count, decreasing=TRUE)]
     
     ### trim the word sequence matrix
     if (verbose) print("triming word sequence matrix ...")
@@ -45,14 +42,13 @@ createWordSequenceFile <- function(inTxt, outTxt,
     ws <- ws[ws$word1 != ws$word2]
     ws <- ws[ws$word1 != ws$word3]
     ws <- ws[ws$word2 != ws$word3]
-
+    #ws <- subset(ws, select=-G2)
+    
     ## output to file
     f1 <- paste(outTxt,".csv", sep="")
-    if (verbose) print("output to files ...")
     if (toGzip == TRUE) {
+        if (verbose) print("output to files ...")
         write.csv(ws, file = gzfile(paste(f1,".gz",sep="")), row.names=FALSE)
-    } else {
-        write.csv(ws, file = f1, row.names=FALSE)
     }
     ws
 }
@@ -62,7 +58,9 @@ createWordSequenceFile <- function(inTxt, outTxt,
 ### Text Clean Up
 ###
 cleanUpTxt <- function (inTxt) {
+    inTxt <- enc2utf8(inTxt)
     inTxt <- gsub("#\\w+ *","", inTxt) #remove user name in Tweets
+    inTxt <- gsub("@\\w+ *","", inTxt) #remove user name in Tweets
     inTxt <- gsub(" www(.+) ", " ", inTxt) #remove url
     inTxt <- gsub("\\d+\\w+", "", inTxt) #remove alphanum
     inTxt <- gsub("\\&", " and ", inTxt)
@@ -76,7 +74,7 @@ cleanUpTxt <- function (inTxt) {
 ###
 ### Find Next Words, return atmost 5 words (the Model)
 ###
-nextNWords <- function (inTxt, ws, nword=3L) {
+nNextWord <- function (inTxt, ws, nword=3L) {
     inTxt <- cleanUpTxt(inTxt)
     words <- tokenize(toLower(inTxt), removePunct=TRUE, removeNumbers=TRUE)
     if (length(words[[1]]) < 1) return (c("No word to be used"))
@@ -89,6 +87,7 @@ nextNWords <- function (inTxt, ws, nword=3L) {
     if (length(words[[1]]) > 1) { 
         last2ndWord <- tail(words[[1]],2)[1]
         subws <- subset(ws, word1==last2ndWord & word2==lastWord & word3!="")
+#        subws <- subws[order(subws$count, decreasing = TRUE)]
         n <- ifelse (nrow(subws)>=nword, nword, nrow(subws))
         for (i in 1:n) {
             rTxt[i] <- subws$word3[i]
@@ -106,45 +105,76 @@ nextNWords <- function (inTxt, ws, nword=3L) {
     list("good",rTxt)
 }
 
+###
+### Calculate the accuracy of next word predictive
+###
+accuracy <- function (txt, ws, verbose=FALSE) {
+    txt <- strsplit(txt, split = " ")
+    tmatch <- 0
+    for (i in 1:nline) {
+        match <- 0
+        ntxt <- length(txt[[i]])
+        sentance <- ""
+        for (j in 1:(ntxt-1)) {
+            sentance <- paste (sentance, txt[[i]][j], sep=" ")
+            n_words <- nNextWord(sentance, ws, 5)
+            if (n_words[[1]]!="good") next
+            if (txt[[i]][j+1] %in% n_words[[2]]) match <- match+1
+        }
+        tmatch <- tmatch + match
+        if (verbose==TRUE) print (c(match, (ntxt-1)))
+    }
+    acc <- tmatch/(sum(sapply(txt, length))-length(txt))
+    acc
+}
+
+
 
 ###########################
-sample_ratio <- 0.1 
-news_ws <- createWordSequenceFile ("final/en_US/en_US.news.txt", outTxt = "news_ws",
-                                   perc = sample_ratio, toGzip = FALSE)
+memory.limit(size = 16000)
+sample_ratio <- 0.6 
+news_ws <- createWordSequenceFile ("final/en_US/en_US.news.txt", outTxt = "news_ws_6",
+                                   perc = sample_ratio, toGzip = TRUE)
 blogs_ws <- createWordSequenceFile ("final/en_US/en_US.blogs.txt", outTxt = "blogs_ws",
-                                   perc = sample_ratio, toGzip = FALSE)
+                                    perc = sample_ratio, toGzip = FALSE)
 tweet_ws <- createWordSequenceFile ("final/en_US/en_US.twitter.txt", outTxt = "tweet_ws",
-                                   perc = sample_ratio, toGzip = FALSE)
+                                    perc = sample_ratio, toGzip = FALSE)
+total_ws <- rbind(news_ws,blogs_ws,tweet_ws)
+
+
+news_ws <- data.table(read.csv("news_ws.csv.gz",header=TRUE,stringsAsFactors=FALSE))
+## test the accuracy of prediction
+nline <- 20
+txt <- sample_lines("final/en_US/en_US.news.txt", nline)
+## do comparison
+gnews_ws <- news_ws[order(news_ws$G2, decreasing = TRUE)]
+accTable <- data.frame(Freq=c(0,0),G2=c(0,0),Size=c(0,0))
+### full word sequence
+facc <- accuracy(txt, news_ws, verbose = TRUE)
+gacc <- accuracy(txt, gnews_ws, verbose = TRUE)
+accTable[1,] <- c(facc, gacc, object.size(news_ws))
+### drop the low occurance word pairs
+for (n in 1:20) {
+    news_ws <- news_ws[news_ws$count>n]
+    gnews_ws <- gnews_ws[gnews_ws$count>n]
+    facc <- accuracy(txt, news_ws)
+    gacc <- accuracy(txt, gnews_ws)
+    accTable[n+1,] <- c(facc, gacc, object.size(news_ws))
+}
+accTable
+
+
+ 
+
+
 
 ## build a sentance with a initial word
 sentance <- "mom"
 for (i in 1:10) {
     print(sentance)
-    n_words <- nextNWords (sentance, tweet_ws)
+    n_words <- nNextNWord (sentance, news_ws)
     if (n_words[[1]]!="good") break
     sentance <- paste(sentance, n_words[[2]][1], sep=" ")
     print(n_words[[2]])
 }
 print(sentance)
-
-## test the accuracy of prediction
-nline <- 10
-txt <- sample_lines("final/en_US/en_US.twitter.txt", nline)
-txt <- strsplit(txt, split = " ")
-tmatch <- 0
-for (i in 1:nline) {
-    match <- 0
-    ntxt <- length(txt[[i]])
-    sentance <- ""
-    for (j in 1:(ntxt-1)) {
-        sentance <- paste (sentance, txt[[i]][j], sep=" ")
-        n_words <- nextNWords(sentance, tweet_ws, 5)
-        if (txt[[i]][j+1] %in% n_words[[2]]) match <- match+1
-    }
-    print (c(match, length(txt[[i]])))
-    tmatch <- tmatch + match
-}
-acc <- tmatch/sum(sapply(txt, length))
-print (acc)
-
-# build the predictive algorithm
