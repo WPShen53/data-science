@@ -22,7 +22,7 @@ Exploratory Analysis
 
 - <b>Different Patterns in Different Social Media</b>. Although using the same language, i.e. English, different word used, frequency and collocation were observed. 
 
-- <b>Sampling Size for Modeling</b>. - <b>Sampling Size for Modeling</b>. A lexical diversity test (CTTR) was performed and founded it converged after the sample size > 60%. Thus, 60% of random sampled data is used for modeling, 20% would be for model validation and 20% for testing.
+- <b>Sampling Size for Modeling</b>. A lexical diversity test (CTTR) was performed and founded it converged after the sample size > 60%. Thus, 60% of random sampled data is used for modeling, 20% would be for model validation and 20% for testing.
 <font size="6" face="monospace">
 </font>
 
