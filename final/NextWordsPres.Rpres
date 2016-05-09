@@ -12,7 +12,7 @@ The purpose of this final project is to create a model to predict the next word 
 As Natural Language Process or Text Processing were not taugh. Self-study of the references from course website and the following books were done to obtain the necessary knowledge.
 
 - "Speech and Language Processing", Daniel Jurafsky & James H. Martin
-- "Foundations of Statistical Natural Language Processing", Chris Manning and Hinrich Schütze
+- "Foundations of Statistical Natural Language Processing", Chris Manning and Hinrich SchÃ¼tze
 
 Training dataset is provided from the Coursera site. <a href="https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip">Capstone Dataset</a>
 
@@ -22,7 +22,7 @@ Exploratory Analysis
 
 - <b>Different Patterns in Different Social Media</b>. Although using the same language, i.e. English, different word used, frequency and collocation were observed. 
 
-- <b>Sampling Size for Modeling</b>. The training sample size was determined by the unique words (vocabulary) in the sample. 60% of random sampled data is used for modeling, as it covers over 96% of the word used in the total dataset.
+- <b>Sampling Size for Modeling</b>. - <b>Sampling Size for Modeling</b>. A lexical diversity test (CTTR) was performed and founded it converged after the sample size > 60%. Thus, 60% of random sampled data is used for modeling, 20% would be for model validation and 20% for testing.
 <font size="6" face="monospace">
 </font>
 
