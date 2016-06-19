@@ -56,7 +56,7 @@ lines(x=tms$MonDif,y=tms$QTY12)
 
 ## Build the summary data.frame which conten the 
 
-sum_df <- aggregate(QTY12 ~ Customer.Family + TM6, data = df_booking_Qty, sum)
+sum_df <- aggregate(QTY12 ~ Customer.Family + TM6 + UMG + Segment, data = df_booking_Qty, sum)
 sum_df <- mutate(sum_df, CusTM6 = paste(as.character(sum_df$Customer.Family), as.character(sum_df$TM6), sep="."))
 sum_df <- unfactorize(sum_df)
 # cus_list <- unique(sum_df$Customer.Family)
@@ -64,8 +64,10 @@ sum_df <- unfactorize(sum_df)
 startM <- sapply(tm6.list, FUN=function(tm){min(tm$BOOK_MONTH)})
 endM <- sapply(tm6.list, FUN=function(tm){max(tm$BOOK_MONTH)})
 perM <- sapply(tm6.list, FUN=function(tm){length(tm$BOOK_MONTH)})
-sum_df <- mutate(sum_df, mon.start=startM, mon.end=endM, mon.dur=perM)
-
+sum_df <- mutate(sum_df, mon.start=0, mon.end=0, mon.dur=0)
+sum_df$mon.start <- startM[sum_df$CusTM6]
+sum_df$mon.end <- endM[sum_df$CusTM6]
+sum_df$mon.dur <- perM[sum_df$CusTM6]
 
 
 ### working script sets
