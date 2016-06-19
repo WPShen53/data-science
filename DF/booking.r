@@ -26,6 +26,10 @@ CalMonthDif <- function(month) {
   dif
 }
 
+unfactorize <- function(df){
+  for(i in which(sapply(df, class) == "factor")) df[[i]] = as.character(df[[i]])
+  return(df)
+}
 
 # df_booking_Qty <- read.csv("~/R/Project/df_booking_Qty.csv")
 
@@ -40,7 +44,9 @@ cus <- unique(df$Customer.Family)
 tm6 <- unique(df$TM6)
 
 tm6.list <- split (df, df$TM6)
+tm6.list <- lapply(tm6.list, FUN=unfactorize)
 tm6.list <- lapply(tm6.list, FUN=FillMissingMonth, dur=dur)
+
 
 df_tm6 <- aggregate(QTY12 ~ Customer.Family + TM6, data = df, sum)
 
