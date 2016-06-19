@@ -2,26 +2,28 @@ library(dplyr)
 library(lubridate)
 
 FillMissingMonth <- function (tm, dur) {
-    missing_mon <- dur[dur<max(tm$BOOK_MONTH) & 
-                           dur>min(tm$BOOK_MONTH) & 
-                           !(dur%in%tm$BOOK_MONTH)]
-    if (length(missing_mon)>0) {
-        newrow <- tm[1:length(missing_mon),]
-        newrow <- mutate(newrow, QTY12=0, BOOK_MONTH=missing_mon)
-        tm <- rbind(tm, newrow)
-    }
-    tm <- mutate(tm, MonDif = CalMonthDif(BOOK_MONTH))
-    tm <- tm[order(tm$MonDif),]
-    tm
+  missing_mon <- dur[dur<max(tm$BOOK_MONTH) & 
+                       dur>min(tm$BOOK_MONTH) & 
+                       !(dur%in%tm$BOOK_MONTH)]
+  cus <- tm$Customer.Family[1]
+  tm6 <- tm$TM6[1]
+  if (length(missing_mon)>0) {
+    newrow <- tm[1:length(missing_mon),]
+    newrow <- mutate(newrow, Customer.Family=cus, TM6=tm6, QTY12=0, BOOK_MONTH=missing_mon)
+    tm <- rbind(tm, newrow)
+  }
+  tm <- mutate(tm, MonDif = CalMonthDif(BOOK_MONTH))
+  tm <- tm[order(tm$MonDif),]
+  tm
 }
 
 CalMonthDif <- function(month) {
-    start <- month[1]
-    dif <- month - start
-    for (i in 1:7) {
-        dif[which(dif>88)] <- dif[which(dif>88)] - 88
-    }
-    dif
+  start <- month[1]
+  dif <- month - start
+  for (i in 1:7) {
+    dif[which(dif>88)] <- dif[which(dif>88)] - 88
+  }
+  dif
 }
 
 
@@ -38,19 +40,19 @@ cus <- unique(df$Customer.Family)
 tm6 <- unique(df$TM6)
 
 tm6.list <- split (df, df$TM6)
-lapply(tm6.list, FUN=FillMissingMonth, dur=dur)
+tm6.list <- lapply(tm6.list, FUN=FillMissingMonth, dur=dur)
 
 df_tm6 <- aggregate(QTY12 ~ Customer.Family + TM6, data = df, sum)
 
 
 ### working script sets
 
-tms477 <- tm6.list[["TMS477"]]
-tms477 <- FillMissingMonth(tms477, dur)
-tms477 <- mutate(tms477, MonDif = CalMonthDif(BOOK_MONTH))
-tms477 <- tms477[order(tms477$MonDif),]
-plot(x=tms477$MonDif,y=tms477$QTY12)
-lines(x=tms477$MonDif,y=tms477$QTY12)
+tms <- tm6.list[["TMS477"]] #TMF472
+tms <- FillMissingMonth(tms, dur)
+tms <- mutate(tms, MonDif = CalMonthDif(BOOK_MONTH))
+tms <- tms477[order(tms$MonDif),]
+plot(x=tms$MonDif,y=tms$QTY12)
+lines(x=tms$MonDif,y=tms$QTY12)
 
 
 qbooking <- booking_sum_Cus[["Qualcomm"]]
