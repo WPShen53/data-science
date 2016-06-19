@@ -57,8 +57,13 @@ lines(x=tms$MonDif,y=tms$QTY12)
 
 sum_df <- aggregate(QTY12 ~ Customer.Family + TM6, data = df_booking_Qty, sum)
 sum_df <- unfactorize(sum_df)
-cus <- unique(sum_df$Customer.Family)
-tm6 <- unique(sum_df$TM6)
+cus_list <- unique(sum_df$Customer.Family)
+tm6_list <- unique(sum_df$TM6)
+startM <- sapply(tm6.list, FUN=function(tm){min(tm$BOOK_MONTH)})
+endM <- sapply(tm6.list, FUN=function(tm){max(tm$BOOK_MONTH)})
+perM <- sapply(tm6.list, FUN=function(tm){length(tm$BOOK_MONTH)})
+sum_df <- mutate(sum_df, mon.start=startM, mon.end=endM, mon.dur=perM)
+
 
 
 ### working script sets
