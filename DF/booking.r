@@ -38,13 +38,14 @@ load("~/R/Project/df_booking_Qty.RData")
 ## a list of data.frame where TM6 is the names of list
 
 df <- subset(df_booking_Qty, select=-c(QTY8,SVC,Sector,Segment))
+df <- mutate(df, CusTM6 = paste(as.character(df$Customer.Family), as.character(df$TM6), sep="."))
 sum(duplicated(df))
 dur <- unique(df$BOOK_MONTH)
-df <- aggregate (QTY12 ~ TM6 + BOOK_MONTH, data = df, sum)
-df <- df[order(df$TM6),]
+df <- aggregate (QTY12 ~ CusTM6 + BOOK_MONTH, data = df, sum)
+#df <- df[order(df$CusTM6),]
 
-tm6.list <- split (df, df$TM6)
-tm6.list <- lapply(tm6.list, FUN=subset, select=-TM6)
+tm6.list <- split (df, df$CusTM6)
+tm6.list <- lapply(tm6.list, FUN=subset, select=-CusTM6)
 tm6.list <- lapply(tm6.list, FUN=unfactorize)
 tm6.list <- lapply(tm6.list, FUN=FillMissingMonth, dur=dur)
 
@@ -56,9 +57,10 @@ lines(x=tms$MonDif,y=tms$QTY12)
 ## Build the summary data.frame which conten the 
 
 sum_df <- aggregate(QTY12 ~ Customer.Family + TM6, data = df_booking_Qty, sum)
+sum_df <- mutate(sum_df, CusTM6 = paste(as.character(sum_df$Customer.Family), as.character(sum_df$TM6), sep="."))
 sum_df <- unfactorize(sum_df)
-cus_list <- unique(sum_df$Customer.Family)
-tm6_list <- unique(sum_df$TM6)
+# cus_list <- unique(sum_df$Customer.Family)
+# tm6_list <- unique(sum_df$TM6)
 startM <- sapply(tm6.list, FUN=function(tm){min(tm$BOOK_MONTH)})
 endM <- sapply(tm6.list, FUN=function(tm){max(tm$BOOK_MONTH)})
 perM <- sapply(tm6.list, FUN=function(tm){length(tm$BOOK_MONTH)})
